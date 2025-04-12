@@ -1,5 +1,7 @@
 package com.ksj.chatting.chat.client;
 
+import com.ksj.chatting.chat.server.ChatThread;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,6 +20,10 @@ public class ChatClient {
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
 
+        //쓰레드 시작
+        ChatReceiverThread thread = new ChatReceiverThread(socket);
+        thread.start();
+
         while (true) {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             String outMsg = br.readLine();
@@ -25,6 +31,7 @@ public class ChatClient {
             if (outMsg.length() > 0) {
                 outMsg += "\n";
                 System.out.println("outMsg : " + outMsg);
+
                 out.write(outMsg.getBytes(StandardCharsets.UTF_8));
                 out.flush();
                 System.out.println("전송완료");

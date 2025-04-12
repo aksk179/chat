@@ -33,8 +33,6 @@ public class ChatClient {
             String outMsg = br.readLine();
 
             if (outMsg.length() > 0) {
-                outMsg += "\n";
-
                 chatVO = new ChatVO();
                 chatVO.userName = userName;
                 chatVO.msg = outMsg;

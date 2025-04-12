@@ -1,5 +1,7 @@
 package com.ksj.chatting.chat.server;
 
+import com.ksj.chatting.chat.vo.ChatVO;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -10,12 +12,12 @@ public class ChatThread extends Thread {
 
     Socket socket;
 
-    static List<PrintWriter> list = Collections.synchronizedList(new ArrayList<PrintWriter>());
+    static List<ObjectOutputStream> list = Collections.synchronizedList(new ArrayList<ObjectOutputStream>());
 
     public ChatThread(Socket socket) {
         this.socket = socket;
         try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream());
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             list.add(out);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -27,25 +29,27 @@ public class ChatThread extends Thread {
         try {
             String connIp = socket.getInetAddress().getHostAddress();
             System.out.println("connIp에서 연결시도 : " + connIp);
-            InputStream in = socket.getInputStream( );
-            OutputStream out = socket.getOutputStream( );
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             while (true) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                String inMsg = br.readLine();
+                ChatVO receivedVO = (ChatVO) in.readObject();
 
-                System.out.println("inMsg : " + inMsg);
-                sendAll(">>" + inMsg);
+                sendAll(receivedVO);
             }
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void sendAll(String s) {
-        for (PrintWriter out : list) {
-            out.println(s);
-            out.flush();
+    private void sendAll(ChatVO chatVO) {
+        for (ObjectOutputStream out : list) {
+            try {
+                out.writeObject(chatVO);
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

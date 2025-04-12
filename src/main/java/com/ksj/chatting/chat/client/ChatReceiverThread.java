@@ -1,9 +1,8 @@
 package com.ksj.chatting.chat.client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.ksj.chatting.chat.vo.ChatVO;
+
+import java.io.*;
 import java.net.Socket;
 
 public class ChatReceiverThread extends Thread{
@@ -17,16 +16,20 @@ public class ChatReceiverThread extends Thread{
     @Override
     public void run() {
         try {
-            InputStream in = socket.getInputStream();
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             while (true) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                String inMsg = br.readLine();
-
-                System.out.println("inMsg : " + inMsg);
+                ChatVO receivedVO = (ChatVO) in.readObject();
+                if ("ENTER".equals(receivedVO.command)) {
+                    System.out.println(receivedVO.userName + "님이 입장했습니다.");
+                } else if ("CHAT".equals(receivedVO.command)){
+                    System.out.println(receivedVO.userName + " : " + receivedVO.msg);
+                } else if ("EXIT".equals(receivedVO.command)){
+                    System.out.println(receivedVO.userName + "님이 퇴장했습니다.");
+                }
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

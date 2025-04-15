@@ -13,11 +13,13 @@ public class ChatThread extends Thread {
     Socket socket;
 
     static List<ObjectOutputStream> list = Collections.synchronizedList(new ArrayList<ObjectOutputStream>());
+    ObjectOutputStream out = null;
+    ObjectInputStream in = null;
 
     public ChatThread(Socket socket) {
         this.socket = socket;
         try {
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
             list.add(out);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -29,7 +31,7 @@ public class ChatThread extends Thread {
         try {
             String connIp = socket.getInetAddress().getHostAddress();
             System.out.println("connIp에서 연결시도 : " + connIp);
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            in = new ObjectInputStream(socket.getInputStream());
 
             while (true) {
                 ChatVO receivedVO = (ChatVO) in.readObject();
@@ -51,5 +53,16 @@ public class ChatThread extends Thread {
                 throw new RuntimeException(e);
             }
         }
+
+        if ("EXIT".equalsIgnoreCase(chatVO.command)) {
+            try {
+                if (socket != null) socket.close();
+                if (out != null) out.close();
+                if (in != null) in.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }

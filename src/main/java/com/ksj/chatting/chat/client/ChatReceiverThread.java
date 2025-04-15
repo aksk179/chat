@@ -22,9 +22,9 @@ public class ChatReceiverThread extends Thread{
                 ChatVO receivedVO = (ChatVO) in.readObject();
                 if ("ENTER".equals(receivedVO.command)) {
                     System.out.println(receivedVO.userName + "님이 입장했습니다.");
-                } else if ("CHAT".equals(receivedVO.command)){
+                } else if ("CHAT".equals(receivedVO.command)) {
                     System.out.println(receivedVO.userName + " : " + receivedVO.msg);
-                } else if ("EXIT".equals(receivedVO.command)){
+                } else if ("EXIT".equals(receivedVO.command)) {
                     System.out.println(receivedVO.userName + "님이 퇴장했습니다.");
                 }
             }
